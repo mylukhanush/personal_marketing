@@ -1,28 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modern Marketing</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marketo Organic Farm – Fresh From The Field</title>
+  <meta name="description" content="Marketo Organic Farm – browse our fresh, sustainably grown organic produce.">
+  <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-    <header>
-        <a href="/" class="logo">Marketo</a>
-    </header>
 
-    <main class="container">
-        <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Search incredible products...">
+  <!-- ══ HEADER ═══════════════════════════════════════════ -->
+  <header id="mainHeader">
+    <a href="/" class="logo-link">
+      <img src="/static/images/logo.png" alt="Marketo Organic Farm" class="header-logo">
+    </a>
+    <div class="header-right">
+      <!-- Guest: Login button top-right -->
+      <div id="guestNav">
+        <button class="btn btn-login" onclick="openModal('loginModal')">Login</button>
+      </div>
+      <!-- Logged-in: name + logout -->
+      <div id="userNav" class="hidden">
+        <span class="user-greeting" id="userGreeting">👋 Hello!</span>
+        <button class="btn btn-outline" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ══ SLIDE WRAPPER ═════════════════════════════════════ -->
+  <div class="slide-wrapper" id="slideWrapper">
+
+    <!-- ── SLIDE 1: HERO ─────────────────────────────────── -->
+    <section class="slide slide-hero" id="slideHero">
+      <div class="hero-content">
+        <img src="/static/images/logo.png" alt="Marketo Organic Farm" class="hero-logo">
+        <h1 class="hero-title">Fresh From The Field</h1>
+        <p class="hero-sub">100% organic. Sustainably grown. Delivered with care.</p>
+      </div>
+    </section>
+
+    <!-- ── SLIDE 2: PRODUCTS ─────────────────────────────── -->
+    <section class="slide slide-products hidden" id="slideProducts">
+      <div class="products-inner">
+        <div class="products-topbar">
+          <h2 class="products-heading">🌿 Our Fresh Products</h2>
+          <div class="search-container">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" id="searchInput" placeholder="Search fresh products…">
+          </div>
         </div>
 
         <div id="loader" class="loader"></div>
         <div id="productsGrid" class="products-grid hidden"></div>
-        <div id="noProducts" class="hidden" style="text-align: center; margin-top: 50px; font-size: 1.2rem; color: var(--text-secondary);">
-            No products found.
-        </div>
-    </main>
+        <div id="noProducts" class="hidden no-products-msg">No products found.</div>
+      </div>
+    </section>
 
-    <script src="/static/js/main.js"></script>
+  </div><!-- /slide-wrapper -->
+
+  <!-- ══ FOOTER ════════════════════════════════════════════ -->
+  <footer class="site-footer">
+    <p>&copy; 2026 Marketo Organic Farm. All rights reserved.</p>
+  </footer>
+
+  <!-- ══ LOGIN MODAL ═══════════════════════════════════════ -->
+  <div class="modal" id="loginModal" onclick="handleOverlayClick(event,'loginModal')">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('loginModal')">&times;</button>
+      <div class="modal-header">
+        <img src="/static/images/logo.png" alt="logo" class="modal-logo">
+        <h2 class="modal-title">Welcome Back</h2>
+        <p class="modal-sub">Login to your Marketo account</p>
+      </div>
+      <p id="loginError" class="form-error hidden"></p>
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="loginEmail">Email Address</label>
+          <input type="email" id="loginEmail" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <div class="input-wrap">
+            <input type="password" id="loginPassword" placeholder="••••••••" required>
+            <button type="button" class="eye-btn" onclick="togglePwd('loginPassword',this)">👁</button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-full btn-green" id="loginSubmitBtn">Login</button>
+      </form>
+      <p class="modal-switch">New here? <a href="#" onclick="switchModal('loginModal','signupModal'); return false;">Create an Account</a></p>
+    </div>
+  </div>
+
+  <!-- ══ SIGN-UP MODAL ═════════════════════════════════════ -->
+  <div class="modal" id="signupModal" onclick="handleOverlayClick(event,'signupModal')">
+    <div class="modal-content modal-content-compact">
+      <button class="modal-close" onclick="closeModal('signupModal')">&times;</button>
+      <div class="modal-header compact-header">
+        <img src="/static/images/logo.png" alt="logo" class="modal-logo modal-logo-sm">
+        <h2 class="modal-title">Join Marketo</h2>
+        <p class="modal-sub">Create your free account</p>
+      </div>
+      <p id="signupError" class="form-error hidden"></p>
+      <form id="signupForm" onsubmit="handleSignup(event)">
+        <div class="form-group form-group-sm">
+          <label for="signupName">Full Name</label>
+          <input type="text" id="signupName" placeholder="Jane Doe" required>
+        </div>
+        <div class="form-group form-group-sm">
+          <label for="signupEmail">Email Address</label>
+          <input type="email" id="signupEmail" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group form-group-sm">
+          <label for="signupPhone">Phone Number</label>
+          <input type="tel" id="signupPhone" placeholder="+91 98765 43210" required>
+        </div>
+        <div class="form-group form-group-sm">
+          <label for="signupPassword">Password</label>
+          <div class="input-wrap">
+            <input type="password" id="signupPassword" placeholder="Min. 6 characters" required minlength="6">
+            <button type="button" class="eye-btn" onclick="togglePwd('signupPassword',this)">👁</button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-full btn-green" id="signupSubmitBtn">Create Account</button>
+      </form>
+      <p class="modal-switch">Already have an account? <a href="#" onclick="switchModal('signupModal','loginModal'); return false;">Login</a></p>
+    </div>
+  </div>
+
+  <!-- ══ SESSION TIMER BANNER ══════════════════════════════ -->
+  <div class="session-banner hidden" id="sessionBanner">
+    ⏱ Session expiring in <strong id="sessionCountdown"></strong> — <a href="#" onclick="refreshSession();return false;">Stay logged in</a>
+  </div>
+
+  <script src="/static/js/main.js"></script>
 </body>
 </html>

@@ -15,7 +15,7 @@ class ProductResponse(ProductBase):
     id: int
     created_at: datetime
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class AdminLogin(BaseModel):
     email: EmailStr
@@ -24,3 +24,23 @@ class AdminLogin(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+# ── User schemas ────────────────────────────────────────
+class UserRegister(BaseModel):
+    name: str
+    email: EmailStr
+    phone: str
+    password: str
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class UserResponse(BaseModel):
+    id: int
+    name: str
+    email: str
+    phone: str
+    created_at: datetime
+    class Config:
+        from_attributes = True

@@ -10,6 +10,7 @@ import uuid
 
 import models, schemas, auth
 from database import engine, get_db
+from auth import get_current_user
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -62,6 +63,48 @@ def create_initial_admin(admin: schemas.AdminLogin, db: Session = Depends(get_db
     db.add(db_admin)
     db.commit()
     return {"msg": "Admin created successfully"}
+
+# ── User Auth Endpoints ──────────────────────────────────
+
+@app.post("/user/register", response_model=schemas.Token)
+def user_register(user_data: schemas.UserRegister, db: Session = Depends(get_db)):
+    existing = db.query(models.User).filter(models.User.email == user_data.email).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    hashed_pw = auth.get_password_hash(user_data.password)
+    new_user = models.User(
+        name=user_data.name,
+        email=user_data.email,
+        phone=user_data.phone,
+        password=hashed_pw,
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    expires = auth.timedelta(minutes=auth.USER_TOKEN_EXPIRE_MINUTES)
+    token = auth.create_access_token(data={"sub": new_user.email}, expires_delta=expires)
+    return {"access_token": token, "token_type": "bearer"}
+
+
+@app.post("/user/login", response_model=schemas.Token)
+def user_login(form_data: schemas.UserLogin, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.email == form_data.email).first()
+    if not user or not auth.verify_password(form_data.password, user.password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+        )
+    expires = auth.timedelta(minutes=auth.USER_TOKEN_EXPIRE_MINUTES)
+    token = auth.create_access_token(data={"sub": user.email}, expires_delta=expires)
+    return {"access_token": token, "token_type": "bearer"}
+
+
+@app.get("/user/me", response_model=schemas.UserResponse)
+def get_me(current_user: models.User = Depends(get_current_user)):
+    return current_user
+
+
+# ── Product Endpoints ─────────────────────────────────────
 
 @app.get("/products", response_model=List[schemas.ProductResponse])
 def get_products(db: Session = Depends(get_db)):
